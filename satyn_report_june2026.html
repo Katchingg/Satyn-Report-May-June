@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Satyn — Performance Report Jun 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.6; color: #1a1a1a; background: #f5f4f0; }
+  .page { max-width: 960px; margin: 0 auto; padding: 40px 32px; }
+  @media(max-width:600px){ .page { padding: 16px 12px; } }
+  :root { --blue: #0085F7; --blue-light: #E6F2FF; --green: #138D5A; --green-light: #E6F5EE; --amber: #F8B83A; --amber-light: #FEF6E6; --red: #c0392b; --red-light: #fdf0ee; --dark: #0F1923; }
+  .cover { background: var(--dark); color: #fff; border-radius: 12px; padding: 48px; margin-bottom: 24px; position: relative; overflow: hidden; }
+  .cover::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--blue) 0%, var(--green) 50%, var(--amber) 100%); }
+  .cover-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+  .cover-logo-icon { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; } .cover-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
+  .cover-logo-text { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.7); letter-spacing: 0.02em; }
+  .cover-badge { display: inline-block; border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 4px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: rgba(255,255,255,0.75); margin-bottom: 16px; text-transform: uppercase; }
+  .cover-title { font-size: 36px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .cover-subtitle { font-size: 14px; color: rgba(255,255,255,0.55); margin-bottom: 28px; }
+  .cover-meta { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; background: rgba(255,255,255,0.07); border-radius: 8px; padding: 18px 24px; }
+  @media(max-width:600px){ .cover-meta { grid-template-columns: 1fr 1fr; } }
+  .cover-meta-item label { display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 3px; }
+  .cover-meta-item span { font-size: 13px; font-weight: 600; color: #fff; }
+  .section { background: #fff; border-radius: 12px; padding: 32px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .section-title { font-size: 18px; font-weight: 700; color: var(--dark); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+  .section-number { width: 28px; height: 28px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .kpi-card { border-radius: 8px; padding: 14px 16px; border-top: 3px solid transparent; background: #fafaf8; }
+  .kpi-card.blue { border-top-color: var(--blue); }
+  .kpi-card.amber { border-top-color: var(--amber); }
+  .kpi-card.green { border-top-color: var(--green); }
+  .kpi-card.red { border-top-color: var(--red); }
+  .kpi-card.gray { border-top-color: #bbb; }
+  .kpi-label { font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 800; color: var(--dark); margin-bottom: 4px; line-height: 1.2; }
+  .kpi-delta { font-size: 12px; font-weight: 600; }
+  .kpi-delta.up { color: var(--green); }
+  .kpi-delta.down { color: var(--red); }
+  .kpi-delta.neutral { color: #888; }
+  .kpi-prev { font-size: 11px; color: #999; margin-top: 2px; }
+  p { margin-bottom: 12px; font-size: 14px; line-height: 1.7; color: #333; }
+  p:last-child { margin-bottom: 0; }
+  strong { font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+  thead th { background: #f5f4f0; color: #555; font-weight: 700; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 9px 12px; text-align: left; border-bottom: 1px solid #e8e5df; }
+  tbody tr { border-bottom: 1px solid #f0ede8; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 10px 12px; vertical-align: middle; }
+  tbody tr:hover { background: #fafaf8; }
+  .td-name { font-weight: 600; color: var(--dark); }
+  .td-cost { font-weight: 600; }
+  .delta { font-size: 11px; font-weight: 600; display: block; margin-top: 1px; }
+  .delta.up { color: var(--green); }
+  .delta.down { color: var(--red); }
+  .delta.neutral { color: #aaa; }
+  .badge { display: inline-block; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-red { background: var(--red-light); color: var(--red); }
+  .badge-amber { background: var(--amber-light); color: #9a6800; }
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+  .badge-gray { background: #f3f2f0; color: #666; }
+  .highlight { border-radius: 0 8px 8px 0; padding: 12px 14px; margin: 10px 0; font-size: 13px; line-height: 1.6; }
+  .highlight.info { background: var(--blue-light); border-left: 3px solid var(--blue); color: #0a3d80; }
+  .highlight.success { background: var(--green-light); border-left: 3px solid var(--green); color: #0a4a2a; }
+  .highlight.warning { background: var(--amber-light); border-left: 3px solid var(--amber); color: #6b3f00; }
+  .highlight.danger { background: var(--red-light); border-left: 3px solid var(--red); color: #6b1a1a; }
+  .subsection-title { font-size: 13px; font-weight: 700; color: var(--dark); margin: 18px 0 10px; padding-bottom: 7px; border-bottom: 0.5px solid #ede9e3; }
+  .wins-list { list-style: none; margin: 0; padding: 0; }
+  .wins-list li { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f3f2f0; align-items: flex-start; font-size: 13px; line-height: 1.6; }
+  .wins-list li:last-child { border-bottom: none; }
+  .wins-list .icon { flex-shrink: 0; margin-top: 1px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width:600px){ .two-col { grid-template-columns: 1fr; } }
+  .mini-table { width: 100%; font-size: 12px; border-collapse: collapse; margin-top: 8px; }
+  .mini-table th { text-align: left; padding: 6px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: #888; border-bottom: 1px solid #ede9e3; }
+  .mini-table td { padding: 7px 8px; border-bottom: 1px solid #f5f4f0; }
+  .mini-table tr:last-child td { border-bottom: none; }
+  .campaign-block { border: 1px solid #ede9e3; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .campaign-block-title { font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .action-list { list-style: none; margin: 0; padding: 0; }
+  .action-item { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid #f3f2f0; }
+  .action-item:last-child { border-bottom: none; }
+  .action-priority { flex-shrink: 0; }
+  .action-body { flex: 1; }
+  .action-title { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+  .action-desc { font-size: 13px; color: #555; line-height: 1.6; }
+  footer { text-align: center; padding: 32px 0 8px; font-size: 12px; color: #aaa; }
+</style>
+</head><body><div class="page" id="main">
+<div class="cover">
+  <div class="cover-logo">
+    <div class="cover-logo-icon"><img src="data:image/jpeg;base64,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" alt="Katchingg Media"></div>
+    <span class="cover-logo-text">Katchingg Media — Google Ads for eCom</span>
+  </div>
+  <div class="cover-badge">Jun 2026 — Performance Report</div>
+  <h1 class="cover-title">Satyn — Google Ads</h1>
+  <p class="cover-subtitle">May 29 – Jun 27, 2026 vs. Apr 29 – May 28, 2026 · USD</p>
+  <div class="cover-meta">
+    <div class="cover-meta-item"><label>Account</label><span>Satyn</span></div>
+    <div class="cover-meta-item"><label>Period</label><span>Last 30 Days</span></div>
+    <div class="cover-meta-item"><label>Compared to</label><span>Apr 29 – May 28, 2026</span></div>
+    <div class="cover-meta-item"><label>Prepared by</label><span>Katchingg Media</span></div>
+    <div class="cover-meta-item"><label>Campaigns</label><span>12 active</span></div>
+  </div>
+</div>
+<div class="section">
+  <div class="section-title"><div class="section-number">1</div>Account Overview — Last 30 Days vs Previous 30 Days</div>
+  <div class="kpi-grid">
+    <div class="kpi-card blue">
+      <div class="kpi-label">Total Spend</div>
+      <div class="kpi-value">$47,648</div>
+      <div class="kpi-delta up">▲ +3.7% vs prev.</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Account ROAS</div>
+      <div class="kpi-value">2.63x</div>
+      <div class="kpi-delta neutral">— was 2.63x prev.</div>
+      <div class="kpi-prev">-0.01% vs prev.</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Conv. Value</div>
+      <div class="kpi-value">$125,521</div>
+      <div class="kpi-delta up">▲ +3.7% vs prev.</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Conversions</div>
+      <div class="kpi-value">2,541</div>
+      <div class="kpi-delta up">▲ +3.3% vs prev.</div>
+    </div>
+    <div class="kpi-card gray">
+      <div class="kpi-label">Clicks</div>
+      <div class="kpi-value">48,175</div>
+      <div class="kpi-delta down">▼ -2.4% vs prev.</div>
+    </div>
+    <div class="kpi-card gray">
+      <div class="kpi-label">Avg. CPC</div>
+      <div class="kpi-value">$0.99</div>
+      <div class="kpi-delta down">▲ +6.3% vs prev.</div>
+    </div>
+  </div>
+  <p>The account <strong>held steady this period</strong> — spend +3.7% while conversion value also grew +3.7%, keeping ROAS nearly flat at 2.63x (vs 2.63x prior). Conversions grew +3.3% to 2,541, which is positive. However, clicks declined -2.4% while CPC rose +6.3%, meaning <strong>efficiency pressure is building</strong> on the paid-click layer. The main growth engine is <strong>EN - PMax - NB - Products</strong> ($24K spend, +3.65%) which continues to deliver at 1.72x ROAS with +14% conv. value. The standout performer this period is <strong>EN - Big 4 - Brand - Shopping</strong> with an extraordinary ROAS jump to 38x (+294%). Several campaigns are currently in relearning phases following recent SKU-level adjustments and will stabilize over the next 2–3 weeks.</p>
+</div>
+<div class="section">
+  <div class="section-title"><div class="section-number">2</div>Highlights — Last 30 Days</div>
+  <ul class="wins-list">
+    <li><span class="icon">✅</span><span><strong>EN - Big 4 - Brand - Shopping exploded.</strong> ROAS surged to 38.08x (+294%), conversions +307% to 110, conv. value +317% to $5,175. At only $135.90 spend with a $20/day budget, this campaign is massively under-invested — Search IS is only 28.9% with 71% lost at rank. <strong>This is the highest-leverage opportunity in the account.</strong></span></li>
+    <li><span class="icon">✅</span><span><strong>FR - Brand - Shopping came alive.</strong> ROAS jumped to 7.14x (+812%), conversions +647% to 22, conv. value +996% to $1,301. Budget only $10/day — completely budget-capped. Instant scaling candidate.</span></li>
+    <li><span class="icon">✅</span><span><strong>EN - Big 4 - Search - Brand held its dominance.</strong> Search IS at 92.65%, +4.1% improvement — driven by the Jun 1 changes (bid ceiling $1→$2.50, IS target 90%→100%). Cost +109% is the expected result of the higher bid ceiling. Conv. value still grew +4.2% to $31,479. ROAS of 29.4x — brand is locked.</span></li>
+    <li><span class="icon">✅</span><span><strong>EN - NB - Demand Gen scaling well.</strong> Jun 3 tCPA raise ($45→$70) unlocked volume — conversions +134% to 57 while cost/conv dropped -30% to $51.42 (well below the $70 target). The algorithm found efficient scale. Budget near cap — room to push to $150/day.</span></li>
+    <li><span class="icon">✅</span><span><strong>EN - Big 4 - NB - Shopping - Target ROAS Experiment launched.</strong> New experiment achieved 1.85x ROAS on $830 spend with 30 conversions in its first period. Above the learning phase target.</span></li>
+    <li><span class="icon">⚠️</span><span><strong>FR - PMax - NB - Skull Cap ROAS declining.</strong> ROAS fell to 1.09x (-14%), conversion value dropped -18% to $3,026 despite impressions +75%. A new Asset Group with fresh creative (B2G2F Offer) and upgraded audience signals is being built to recover performance.</span></li>
+    <li><span class="icon">🔧</span><span><strong>Satyn – EN – NB Shopping – TEST — budget increased to $190/day.</strong> 41.8% of IS was lost to budget. The ROAS dip from 2.97x to 2.72x is expected after recent SKU-level bid adjustments — the algorithm needs time to relearn on the new product mix. Budget has been raised to $190/day to relieve the IS constraint. Monitor over the next 2–3 weeks.</span></li>
+  </ul>
+</div>
+<div class="section">
+  <div class="section-title"><div class="section-number">3</div>Campaign Performance Summary</div>
+  <div style="overflow-x:auto;">
+  <table>
+    <thead>
+      <tr>
+        <th>Campaign</th>
+        <th>Spend</th>
+        <th>Conv. Value</th>
+        <th>ROAS</th>
+        <th>Conv.</th>
+        <th>Cost/Conv.</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-name">EN - PMax - NB - Products</td>
+        <td class="td-cost">$24,189<span class="delta up">+3.7%</span></td>
+        <td>$41,659<span class="delta up">+14.4%</span></td>
+        <td>1.72x<span class="delta up">+10.4%</span></td>
+        <td>831<span class="delta up">+10.1%</span></td>
+        <td>$29.12<span class="delta up">-5.9%</span></td>
+        <td><span class="badge badge-green">Core ✅</span></td>
+      </tr>
+      <tr>
+        <td class="td-name">EN - Big 4 - Search - Brand</td>
+        <td class="td-cost">$1,069<span class="delta down">+109%</span></td>
+        <td>$31,479<span class="delta up">+4.2%</span></td>
+        <td>29.44x<span class="delta down">-50.1%</span></td>
+        <td>627<span class="delta up">+6.8%</span></td>
+        <td>$1.71<span class="delta down">+95.7%</span></td>
+        <td><span class="badge badge-green">IS 92.7% ✅</span></td>
+      </tr>
+      <tr>
+        <td class="td-name">EN - Big 4 - NB - Shopping</td>
+        <td class="td-cost">$6,801<span class="delta down">-17.0%</span></td>
+        <td>$14,222<span class="delta down">-14.6%</span></td>
+        <td>2.09x<span class="delta up">+2.9%</span></td>
+        <td>310<span class="delta down">-16.2%</span></td>
+        <td>$21.94<span class="delta up">-0.9%</span></td>
+        <td><span class="badge badge-blue">Pruning ✂️</span></td>
+      </tr>
+      <tr>
+        <td class="td-name">Satyn – EN – NB Shopping – TEST</td>
+        <td class="td-cost">$4,630<span class="delta down">+24.6%</span></td>
+        <td>$12,604<span class="delta down">-14.5%</span></td>
+        <td>2.72x<span class="delta down">-31.4%</span></td>
+        <td>259<span class="delta down">-17.1%</span></td>
+        <td>$17.86<span class="delta down">+50.4%</span></td>
+        <td><span class="badge badge-blue">Budget ↑ · Relearning ↻</span></td>
+      </tr>
+      <tr>
+        <td class="td-name">FR - NB - Shopping - Produits - tROAS</td>
+        <td class="td-cost">$3,200<span class="delta down">+33.8%</span></td>
+        <td>$4,475<span class="delta up">+15.0%</span></td>
+        <td>1.40x<span class="delta down">-14.1%</span></td>
+        <td>93<span class="delta up">+27.1%</span></td>
+        <td>$34.28<span class="delta down">+5.3%</span></td>
+        <td><span class="badge badge-blue">Relearning ↻</span></td>
+      </tr>
+      <tr>
+        <td class="td-name">FR - PMax - NB - Skull Cap</td>
+        <td class="td-cost">$2,771<span class="delta up">-4.3%</span></td>
+        <td>$3,026<span class="delta down">-18.1%</span></td>
+        <td>1.09x<span class="delta down">-14.5%</span></td>
+        <td>64<span class="delta down">-9.7%</span></td>
+        <td>$43.52<span class="delta down">+6.0%</span></td>
+        <td><span class="badge badge-red">Underperforming 🚨</span></td>
+      </tr>
+      <tr>
+        <td class="td-name">EN - NB - Demand Gen - TOF</td>
+        <td class="td-cost">$2,954<span class="delta down">+64.9%</span></td>
+        <td>$2,705<span class="delta up">+69.0%</span></td>
+        <td>0.92x<span class="delta up">+2.5%</span></td>
+        <td>57<span class="delta up">+133.8%</span></td>
+        <td>$51.42<span class="delta up">-29.5%</span></td>
+        <td><span class="badge badge-blue">Scaling ↗</span></td>
+      </tr>
+      <tr>
+        <td class="td-name">EN - Big 4 - NB - Shopping (Exp.)</td>
+        <td class="td-cost">$830<span class="delta neutral">NEW</span></td>
+        <td>$1,533<span class="delta neutral">NEW</span></td>
+        <td>1.85x<span class="delta neutral">NEW</span></td>
+        <td>30<span class="delta neutral">NEW</span></td>
+        <td>$27.75</td>
+        <td><span class="badge badge-blue">Learning ↗</span></td>
+      </tr>
+      <tr>
+        <td class="td-name">EN - Big 4 - Brand - Shopping</td>
+        <td class="td-cost">$136<span class="delta down">+5.8%</span></td>
+        <td>$5,175<span class="delta up">+317%</span></td>
+        <td>38.08x<span class="delta up">+294%</span></td>
+        <td>110<span class="delta up">+307%</span></td>
+        <td>$1.23<span class="delta up">-74.0%</span></td>
+        <td><span class="badge badge-green">Top ✅</span></td>
+      </tr>
+      <tr>
+        <td class="td-name">FR - Search - Brand</td>
+        <td class="td-cost">$201<span class="delta up">-3.1%</span></td>
+        <td>$6,141<span class="delta down">-17.8%</span></td>
+        <td>30.60x<span class="delta down">-15.2%</span></td>
+        <td>110<span class="delta down">-20.7%</span></td>
+        <td>$1.82<span class="delta down">+22.1%</span></td>
+        <td><span class="badge badge-green">IS 94% ✅</span></td>
+      </tr>
+      <tr>
+        <td class="td-name">Satyn – FR – NB Shopping – TEST</td>
+        <td class="td-cost">$686<span class="delta down">-73.7%</span></td>
+        <td>$1,201<span class="delta down">-75.9%</span></td>
+        <td>1.75x<span class="delta down">-8.4%</span></td>
+        <td>28<span class="delta down">-72.3%</span></td>
+        <td>$24.89<span class="delta up">-5.3%</span></td>
+        <td><span class="badge badge-blue">Relearning ↻</span></td>
+      </tr>
+      <tr>
+        <td class="td-name">FR - Brand - Shopping</td>
+        <td class="td-cost">$182<span class="delta down">+20.2%</span></td>
+        <td>$1,301<span class="delta up">+996%</span></td>
+        <td>7.14x<span class="delta up">+812%</span></td>
+        <td>22<span class="delta up">+647%</span></td>
+        <td>$8.19<span class="delta up">-83.9%</span></td>
+        <td><span class="badge badge-green">Breakout ✅</span></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+<div class="section">
+  <div class="section-title"><div class="section-number">4</div>Detailed Campaign Analysis</div>
+
+  <div class="campaign-block">
+    <div class="campaign-block-title">EN - Big 4 - Brand - Shopping — <span class="badge badge-green">Top Performer ✅</span></div>
+    <table class="mini-table">
+      <thead><tr><th>Period</th><th>Spend</th><th>ROAS</th><th>Conv.</th><th>Conv. Value</th><th>Search IS</th></tr></thead>
+      <tbody>
+        <tr><td>Prev. 30 days</td><td>~$128</td><td>~9.67x</td><td>~27</td><td>~$1,239</td><td>~23.5%</td></tr>
+        <tr><td><strong>Last 30 days</strong></td><td><strong>$135.90</strong></td><td><strong>38.08x ▲</strong></td><td><strong>110 ▲</strong></td><td><strong>$5,175 ▲</strong></td><td><strong>28.9%</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="highlight success" style="margin-top:12px;">ROAS of 38x is exceptional. With only $20/day budget, this campaign spends $4-5/day and leaves 71% of impressions on the table due to rank losses. At this ROAS level, tripling the budget to $60/day would be zero-risk scaling. The conversion rate (8.5%) and cost/conv ($1.23) are best-in-class.</div>
+    <p style="margin-top:12px;">Search IS is only 28.9% — 71% of brand shopping impressions are being missed due to Ad Rank. Primary lever: <strong>increase the daily budget immediately</strong>. Secondary: review CPC bids (currently manual, $0.10 avg CPC — may need higher bids to win more auctions).</p>
+  </div>
+
+  <div class="campaign-block">
+    <div class="campaign-block-title">EN - PMax - NB - Products - Assets Only — <span class="badge badge-blue">Core Engine ✅</span></div>
+    <table class="mini-table">
+      <thead><tr><th>Period</th><th>Spend</th><th>ROAS</th><th>Conv.</th><th>Conv. Value</th><th>IS Lost (Budget)</th></tr></thead>
+      <tbody>
+        <tr><td>Prev. 30 days</td><td>~$23,337</td><td>~1.56x</td><td>~754</td><td>~$36,396</td><td>~15.4%</td></tr>
+        <tr><td><strong>Last 30 days</strong></td><td><strong>$24,189</strong></td><td><strong>1.72x ▲</strong></td><td><strong>831 ▲</strong></td><td><strong>$41,659 ▲</strong></td><td><strong>12.0% ↓</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="highlight success" style="margin-top:12px;">The main PMax campaign is improving: ROAS +10%, conversions +10%, conv. value +14%. Budget loss rate fell from ~15% to 12%, indicating the bidding strategy is becoming more efficient. The campaign accounts for 51% of total account spend and 33% of conv. value.</div>
+    <p style="margin-top:12px;">Search IS is 19.6% with 68% lost at rank — PMax is finding the right placements but competition is high. Continue monitoring asset performance; consider adding new creative assets or testing a Target ROAS overlay to improve efficiency further.</p>
+  </div>
+
+  <div class="campaign-block">
+    <div class="campaign-block-title">EN - Big 4 - Search - Brand — <span class="badge badge-green">Dominant ✅</span></div>
+    <table class="mini-table">
+      <thead><tr><th>Period</th><th>Spend</th><th>ROAS</th><th>Conv.</th><th>Conv. Value</th><th>Search IS</th></tr></thead>
+      <tbody>
+        <tr><td>Prev. 30 days</td><td>~$511</td><td>~58.9x</td><td>~587</td><td>~$30,206</td><td>~88.9%</td></tr>
+        <tr><td><strong>Last 30 days</strong></td><td><strong>$1,069</strong></td><td><strong>29.44x ▼</strong></td><td><strong>627 ▲</strong></td><td><strong>$31,479 ▲</strong></td><td><strong>92.65% ▲</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="highlight info" style="margin-top:12px;">The ROAS decrease (-50%) is a direct result of the <strong>Jun 1 changes: CPC bid ceiling raised from $1.00 to $2.50 and Target Impression Share increased from 90% to 100%</strong>. This gave Google permission to bid more aggressively for every brand auction. Spend doubled (+109%) as intended, and IS improved from ~89% to 92.65%. <strong>Conversions grew +6.8% and conv. value +4.2%</strong> — brand health is intact.</div>
+    <p style="margin-top:12px;">The ROAS compression from ~59x to ~29x is the expected cost of pushing IS from 90% toward 100% — the marginal impressions cost more. With IS at 92.65% and only 7.35% lost at rank, brand is nearly locked. The changes are working as intended. Monitor whether the incremental spend at the higher bid ceiling continues to drive proportional revenue, and whether 100% IS target is worth the cost premium vs. the previous 90%.</p>
+  </div>
+
+  <div class="campaign-block">
+    <div class="campaign-block-title">FR - NB - Shopping - Produits - tROAS — <span class="badge badge-blue">Relearning · Hero SKUs ↻</span></div>
+    <table class="mini-table">
+      <thead><tr><th>Period</th><th>Spend</th><th>ROAS</th><th>Conv.</th><th>Conv. Value</th><th>Search IS</th></tr></thead>
+      <tbody>
+        <tr><td>Prev. 30 days</td><td>~$2,392</td><td>~1.63x</td><td>~73</td><td>~$3,893</td><td>~59.6%</td></tr>
+        <tr><td><strong>Last 30 days</strong></td><td><strong>$3,200</strong></td><td><strong>1.40x ▼</strong></td><td><strong>93 ▲</strong></td><td><strong>$4,475 ▲</strong></td><td><strong>61.1%</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="highlight info" style="margin-top:12px;">Spend increased +34% but ROAS fell -14% from 1.63x to 1.40x — this is expected during the relearning phase following recent SKU-level adjustments. The campaign is <strong>intentionally limited to hero SKUs only</strong> (the remaining products are allocated to the hero/test campaigns). Conversions grew +27%, which is a positive signal.</div>
+    <p style="margin-top:12px;">Allow 2–3 weeks for the algorithm to stabilize on the adjusted SKU mix before evaluating tROAS performance. The campaign is running on a tROAS target of 160% — if ROAS doesn't recover toward 1.60x+ after the relearning window, consider raising the tROAS target slightly to tighten efficiency.</p>
+  </div>
+
+  <div class="campaign-block">
+    <div class="campaign-block-title">FR - PMax - NB - Skull Cap - Assets Only — <span class="badge badge-red">Underperforming 🚨</span></div>
+    <table class="mini-table">
+      <thead><tr><th>Period</th><th>Spend</th><th>ROAS</th><th>Conv.</th><th>Conv. Value</th><th>IS Lost (Rank)</th></tr></thead>
+      <tbody>
+        <tr><td>Prev. 30 days</td><td>~$2,895</td><td>~1.27x</td><td>~70</td><td>~$3,694</td><td>~85.5%</td></tr>
+        <tr><td><strong>Last 30 days</strong></td><td><strong>$2,771</strong></td><td><strong>1.09x ▼</strong></td><td><strong>64 ▼</strong></td><td><strong>$3,026 ▼</strong></td><td><strong>86.9%</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="highlight danger" style="margin-top:12px;">ROAS fell to 1.09x — near break-even. Despite 75% more impressions, conversions dropped -10% and conv. value -18%. The campaign needs a creative refresh to recover targeting efficiency.</div>
+    <p style="margin-top:12px;">Recovery plan: <strong>(1)</strong> Launch a new Asset Group (<em>Skull Cap – B2G2F Offer</em>) with fresh creative and high-intent Audience Signals (Website Visitors, Past Purchasers) plus competitor Search Themes. <strong>(2)</strong> Update ad copy on the existing asset group and run both side-by-side. <strong>(3)</strong> Once the new group warms up and captures spend (5–7 days), evaluate performance. tROAS is set to 160% — the fresh creative and audience signal upgrade should lift ROAS back above 1.5x.</p>
+  </div>
+
+  <div class="campaign-block">
+    <div class="campaign-block-title">Satyn – EN – NB Shopping – TEST — <span class="badge badge-blue">Budget raised · Relearning ↻</span></div>
+    <table class="mini-table">
+      <thead><tr><th>Period</th><th>Spend</th><th>ROAS</th><th>Conv.</th><th>Conv. Value</th><th>IS Lost (Budget)</th></tr></thead>
+      <tbody>
+        <tr><td>Prev. 30 days</td><td>~$3,715</td><td>~2.97x</td><td>~313</td><td>~$11,034</td><td>~28.9%</td></tr>
+        <tr><td><strong>Last 30 days</strong></td><td><strong>$4,630</strong></td><td><strong>2.72x ▼</strong></td><td><strong>259 ▼</strong></td><td><strong>$12,604 ▼</strong></td><td><strong>41.8% ▲</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="highlight info" style="margin-top:12px;">41.8% of Search IS was lost to budget — budget has now been <strong>raised to $190/day</strong>. The ROAS dip from 2.97x to 2.72x is the expected result of recent SKU-level bid adjustments, not a fundamental decline. The algorithm needs time to relearn on the adjusted product mix. Cost/conv at $17.86 remains competitive.</div>
+    <p style="margin-top:12px;">Allow the campaign 2–3 weeks to stabilize at the new budget level and with the adjusted SKU mix. The Target ROAS strategy should maintain efficiency as budget increases. If ROAS recovers above 2.80x and IS lost to budget drops below 25%, a further increase to $250/day is warranted.</p>
+  </div>
+
+  <div class="campaign-block">
+    <div class="campaign-block-title">EN - NB - Demand Gen - TOF - Testing — <span class="badge badge-blue">Scaling ↗</span></div>
+    <table class="mini-table">
+      <thead><tr><th>Period</th><th>Spend</th><th>ROAS</th><th>Conv.</th><th>Conv. Value</th><th>Cost/Conv.</th></tr></thead>
+      <tbody>
+        <tr><td>Prev. 30 days</td><td>~$1,792</td><td>~0.90x</td><td>~25</td><td>~$1,602</td><td>~$73.10</td></tr>
+        <tr><td><strong>Last 30 days</strong></td><td><strong>$2,954</strong></td><td><strong>0.92x ▲</strong></td><td><strong>57 ▲</strong></td><td><strong>$2,705 ▲</strong></td><td><strong>$51.42 ▲</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="highlight info" style="margin-top:12px;">The scaling is a direct result of the <strong>Jun 3 change: Target CPA raised from $45 to $70</strong>, giving the algorithm more headroom to bid on incremental conversions. The strategy worked — cost/conv landed at $51.42, well below the new $70 target, while conversions more than doubled (+134%) at only +65% more spend. The algorithm found efficient scale within the relaxed constraint.</div>
+    <p style="margin-top:12px;">The tCPA increase was the right call — actual cost/conv ($51) is 27% below the $70 ceiling, meaning the algorithm isn't pushing to the limit. Budget-limited (often near $100/day cap). Consider increasing to $150/day given the proven cost/conv headroom. Continue judging on conversion volume growth and cost/conv trend rather than strict ROAS during TOF learning.</p>
+  </div>
+</div>
+<div class="section">
+  <div class="section-title"><div class="section-number">5</div>ROAS Performance vs Targets</div>
+  <div style="overflow-x:auto;">
+  <table>
+    <thead>
+      <tr>
+        <th>Campaign</th>
+        <th>Prev. ROAS</th>
+        <th>Current ROAS</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="td-name">EN - Big 4 - Brand - Shopping</td><td>~9.7x</td><td><strong>38.08x</strong></td><td><span class="badge badge-green">Outstanding ✅</span></td></tr>
+      <tr><td class="td-name">EN - Big 4 - Search - Brand</td><td>~58.9x</td><td><strong>29.44x</strong></td><td><span class="badge badge-green">IS push — as planned ✅</span></td></tr>
+      <tr><td class="td-name">FR - Search - Brand</td><td>~36.1x</td><td><strong>30.60x</strong></td><td><span class="badge badge-green">Solid ✅</span></td></tr>
+      <tr><td class="td-name">FR - Brand - Shopping</td><td>~0.71x</td><td><strong>7.14x</strong></td><td><span class="badge badge-green">Breakout ✅</span></td></tr>
+      <tr><td class="td-name">EN - PMax - NB - Products</td><td>~1.56x</td><td><strong>1.72x</strong></td><td><span class="badge badge-green">Improving ✅</span></td></tr>
+      <tr><td class="td-name">EN - Big 4 - NB - Shopping</td><td>~2.03x</td><td><strong>2.09x</strong></td><td><span class="badge badge-green">Stable ✅</span></td></tr>
+      <tr><td class="td-name">Satyn – EN – NB Shopping – TEST</td><td>~2.97x</td><td><strong>2.72x</strong></td><td><span class="badge badge-blue">SKU adjustment — relearning ↻</span></td></tr>
+      <tr><td class="td-name">EN - Big 4 - NB - Shopping (Exp.)</td><td>—</td><td><strong>1.85x</strong></td><td><span class="badge badge-blue">New ↗</span></td></tr>
+      <tr><td class="td-name">FR - NB - Shopping - Produits - tROAS</td><td>~1.63x</td><td><strong>1.40x</strong></td><td><span class="badge badge-blue">SKU adjustment — relearning ↻</span></td></tr>
+      <tr><td class="td-name">FR - PMax - NB - Skull Cap</td><td>~1.27x</td><td><strong>1.09x</strong></td><td><span class="badge badge-red">Below target 🚨</span></td></tr>
+      <tr><td class="td-name">EN - NB - Demand Gen</td><td>~0.90x</td><td><strong>0.92x</strong></td><td><span class="badge badge-blue">TOF — improving ↗</span></td></tr>
+      <tr><td class="td-name">Satyn – FR – NB Shopping – TEST</td><td>~1.90x</td><td><strong>1.75x</strong></td><td><span class="badge badge-blue">SKU adjustment — relearning ↻</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="margin-top:16px;">8 out of 12 active campaigns are stable or improving. FR PMax Skull Cap (1.09x ROAS, $2,771 spend) is the primary efficiency concern and is being addressed with a creative-first recovery plan. Three campaigns (EN NB Shopping TEST, FR NB Shopping tROAS, FR NB Shopping TEST) are in relearning phases following SKU adjustments — allow 2–3 weeks before re-evaluating.</p>
+</div>
+<div class="section">
+  <div class="section-title"><div class="section-number">6</div>Action Plan — Next 30 Days</div>
+  <ul class="action-list">
+    <li class="action-item">
+      <div class="action-priority"><span class="badge badge-red">URGENT</span></div>
+      <div class="action-body">
+        <div class="action-title">Scale EN - Big 4 - Brand - Shopping</div>
+        <div class="action-desc">At 38x ROAS with a $20/day budget cap, this is the most obvious scaling opportunity in the account. <strong>Increase daily budget to at least $60-100/day</strong> immediately. Search IS is only 28.9% — 71% of brand shopping auctions are being missed. Also review Manual CPC bids (avg. $0.10) to ensure competitive position. This single change could add $15-20K in monthly conv. value at minimal risk.</div>
+      </div></li>
+    <li class="action-item">
+      <div class="action-priority"><span class="badge badge-red">URGENT</span></div>
+      <div class="action-body">
+        <div class="action-title">Fix FR - PMax - NB - Skull Cap (ROAS 1.09x) — Creative Refresh</div>
+        <div class="action-desc">ROAS has dropped to 1.09x and the campaign needs fresh creative to recover. <strong>(1)</strong> Build a new Asset Group (<em>Skull Cap – B2G2F Offer</em>) with fresh assets. <strong>(2)</strong> Inject high-intent Audience Signals (Website Visitors + Past Purchasers) and competitor Search Themes to sharpen targeting. <strong>(3)</strong> Update the existing asset group's ad copy and run both side-by-side — once the new group warms up and captures spend (5–7 days), evaluate. tROAS is set to 160%. The fresh creative and upgraded audience signals should lift ROAS back above 1.5x.</div>
+      </div></li>
+    <li class="action-item">
+      <div class="action-priority"><span class="badge badge-amber">HIGH</span></div>
+      <div class="action-body">
+        <div class="action-title">Scale FR - Brand - Shopping</div>
+        <div class="action-desc">FR - Brand - Shopping achieved 7.14x ROAS (+812%) this period on only $10/day. Like its EN counterpart, this is massively under-budgeted. <strong>Increase daily budget to $40-60/day</strong> and raise Manual CPC bids (currently $0.15 avg) to compete for more auctions. Search IS is 29.1% with 70.5% lost at rank — near identical story to EN Brand Shopping.</div>
+      </div></li>
+    <li class="action-item">
+      <div class="action-priority"><span class="badge badge-amber">MEDIUM</span></div>
+      <div class="action-body">
+        <div class="action-title">Monitor EN - Big 4 - NB - Shopping post-pruning</div>
+        <div class="action-desc">The volume decline (spend -17%, conversions -16%) is the <strong>expected result of intentional product group pruning</strong>: May 6 excluded the "Everything else" catch-all and raised "All products" CPC from $0.35 to $0.80, then Jun 17 excluded 5 more hero SKUs. ROAS held flat (+2.9%), confirming the pruning is improving efficiency. <strong>Next step:</strong> monitor the remaining product groups over the next 2 weeks — if ROAS continues to hold or improve at the reduced volume, the restructuring is working. The tROAS experiment (1.85x, 30 conv.) running alongside will determine whether automated bidding can recover volume at similar or better efficiency.</div>
+      </div></li>
+    <li class="action-item">
+      <div class="action-priority"><span class="badge badge-blue">MONITOR</span></div>
+      <div class="action-body">
+        <div class="action-title">Monitor FR - NB - Shopping - tROAS post-SKU adjustment</div>
+        <div class="action-desc">The campaign is <strong>intentionally running hero SKUs only</strong> — the remaining products are allocated to the hero/test campaigns, so the apparent 92% product exclusion is by design. ROAS dipped to 1.40x following recent SKU-level adjustments, and the algorithm needs time to relearn on the refined product mix. tROAS is set to 160%. <strong>Allow 2–3 weeks</strong> before re-evaluating. If ROAS doesn't recover toward 1.60x+ after the relearning window, consider raising the tROAS target slightly to tighten efficiency.</div>
+      </div></li>
+    <li class="action-item">
+      <div class="action-priority"><span class="badge badge-blue">MONITOR</span></div>
+      <div class="action-body">
+        <div class="action-title">Satyn – EN – NB Shopping – TEST — budget raised to $190/day, monitor</div>
+        <div class="action-desc">Budget has been increased from ~$156/day to <strong>$190/day</strong> to relieve the 41.8% IS lost to budget. The ROAS dip from 2.97x to 2.72x is the expected result of recent SKU-level bid adjustments — the algorithm needs time to relearn on the new product mix. Cost/conv at $17.86 remains competitive. <strong>Allow 2–3 weeks</strong> for the algorithm to stabilize at the new budget level before making further changes. If ROAS recovers above 2.80x and IS lost to budget drops below 25%, consider a further increase to $250/day.</div>
+      </div></li>
+    <li class="action-item">
+      <div class="action-priority"><span class="badge badge-blue">PIPELINE</span></div>
+      <div class="action-body">
+        <div class="action-title">EN - Big 4 - NB - Shopping tROAS Experiment checkpoint</div>
+        <div class="action-desc">The tROAS experiment achieved 1.85x ROAS on $830 spend with 30 conversions in its first period. Monitor through the end of next 30 days. <strong>Decision rule: if experiment ROAS ≥ control ROAS (2.09x) over 60+ conversions, graduate it to full campaign.</strong> Currently in learning — avoid making changes.</div>
+      </div></li>
+    <li class="action-item">
+      <div class="action-priority"><span class="badge badge-blue">PIPELINE</span></div>
+      <div class="action-body">
+        <div class="action-title">EN - Big 4 - Search - Brand — assess new bid ceiling performance</div>
+        <div class="action-desc">The Jun 1 changes (bid ceiling $1.00→$2.50, IS target 90%→100%) are working as intended — IS improved to 92.65% and conv. value grew +4.2%. The ROAS drop from ~59x to 29x is the expected cost of pushing toward 100% IS with a higher bid ceiling. <strong>Next step:</strong> evaluate whether the incremental cost of the last ~7% IS (93%→100%) is justified by the revenue it captures. If the marginal ROAS on the incremental spend is acceptable, hold. If not, consider dialing IS target back to 95% as a middle ground. Schedule review mid-next-period once the algorithm fully stabilizes on the new settings.</div>
+      </div></li>
+    <li class="action-item">
+      <div class="action-priority"><span class="badge badge-green">GROWTH</span></div>
+      <div class="action-body">
+        <div class="action-title">Launch "Summer SatynCap" Angle via Demand Gen</div>
+        <div class="action-desc">As we move into summer, baseball caps (casquettes) are a high-relevance seasonal product — but Standard Shopping relies on existing search volume. To <strong>manufacture demand</strong>, launch a dedicated Ad Group within <em>EN - NB - Demand Gen - TOF</em> specifically for the SatynCap. <strong>Creative approach:</strong> short-form video focusing on the summer pain point (protecting hair from the sun without causing frizz/hat-hair). Demand Gen visually demonstrates the satin-lined benefit to a cold audience (TOF), generating awareness that will trickle down and be captured by our existing Standard Shopping campaigns.</div>
+      </div></li>
+  </ul>
+</div>
+
+<!-- SECTION 7: WHAT'S NEXT -->
+<div class="section">
+  <div class="section-title"><div class="section-number">7</div>What's Next — Beyond This Period</div>
+  <p>Once the current priorities are executed and stabilized, two growth levers become relevant:</p>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;">
+    <div style="background:#f7f6f3; border-radius:10px; padding:18px 20px;">
+      <div style="font-size:13px; font-weight:800; color:#0F1923; margin-bottom:8px;">🎯 Retargeting (Demand Gen MOF/BOF)</div>
+      <p style="font-size:12.5px; color:#555; line-height:1.6;">The DGen TOF is now generating meaningful cold-audience volume (+134% conversions). As this pool grows over the next 4–6 weeks, a dedicated remarketing layer (site visitors who didn't purchase) becomes the natural funnel extension. <strong>Timing:</strong> after Skull Cap creative refresh is live and relearning campaigns have stabilized.</p>
+    </div>
+    <div style="background:#f7f6f3; border-radius:10px; padding:18px 20px;">
+      <div style="font-size:13px; font-weight:800; color:#0F1923; margin-bottom:8px;">⚔️ Competitor Search</div>
+      <p style="font-size:12.5px; color:#555; line-height:1.6;">Competitor campaigns typically land at 1–2x ROAS — there are higher-ROI opportunities to capture first (brand Shopping IS is still at 29% EN / 29% FR). Once brand IS is locked above 90% and non-brand campaigns are stable, a small test budget on 2–3 competitor names is warranted. The satin-lining angle provides a genuine differentiator for ad copy.</p>
+    </div>
+  </div>
+  <p style="margin-top:14px; font-size:12.5px; color:#888; font-style:italic;">Priority sequence: Scale brand Shopping → Skull Cap creative refresh → Relearning stabilization → Summer SatynCap DGen → <strong>Retargeting layer</strong> → <strong>Competitor Search test</strong>.</p>
+</div>
+
+<!-- CLOSING PAGE -->
+<div class="cover" style="margin-top:24px; text-align:center; padding:60px 48px;">
+  <div style="display:flex; justify-content:center; margin-bottom:16px;">
+    <img src="data:image/jpeg;base64,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" alt="Katchingg Media" style="width:56px; height:56px; border-radius:50%;">
+  </div>
+  <div style="font-size:12px; font-weight:700; letter-spacing:2px; color:rgba(255,255,255,0.5); text-transform:uppercase; margin-bottom:28px;">Katchingg Media</div>
+  <h2 style="font-size:28px; font-weight:800; color:#fff; margin-bottom:16px; letter-spacing:-0.3px;">June held the line. July is where we push.</h2>
+  <p style="font-size:14px; color:rgba(255,255,255,0.5); max-width:600px; margin:0 auto 36px; line-height:1.7;">ROAS held flat at 2.63x while spend grew +3.7%. Brand Shopping breakout identified (38x ROAS). 3 campaigns restructured and relearning. Creative refresh planned for Skull Cap. Summer SatynCap DGen angle queued. The scaling levers are loaded — July is execution.</p>
+  <div style="display:inline-flex; gap:1px; background:rgba(255,255,255,0.1); border-radius:8px; overflow:hidden; margin-bottom:36px;">
+    <div style="background:rgba(255,255,255,0.06); padding:16px 32px;">
+      <div style="font-size:10px; font-weight:700; letter-spacing:1.2px; color:rgba(255,255,255,0.4); text-transform:uppercase; margin-bottom:4px;">Prepared by</div>
+      <div style="font-size:14px; font-weight:700; color:#fff;">Katchingg Media</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.4);">Google Ads for eCom</div>
+    </div>
+  </div>
+  <div style="display:flex; justify-content:center;">
+    <div style="width:120px; height:3px; border-radius:2px; background:linear-gradient(90deg, #0085F7 0%, #138D5A 50%, #F8B83A 100%);"></div>
+  </div>
+</div>
+
+<footer>
+  Katchingg Media — Google Ads for eCom<br>
+  Satyn · May 29 – Jun 27, 2026 vs Apr 29 – May 28, 2026 · Google Ads Data (USD)
+</footer></div></body></html>
